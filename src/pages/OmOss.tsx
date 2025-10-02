@@ -1,11 +1,34 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import CookieBanner from "@/components/CookieBanner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Share2, Bell } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Calendar, Users, Share2, Bell, Mail, MapPin, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const OmOss = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    toast({
+      title: "Melding mottatt!",
+      description: "Takk for at du kontaktet oss. Vi kommer tilbake til deg snart.",
+    });
+    
+    setFormData({ name: "", email: "", message: "" });
+  };
+
   const features = [
     {
       icon: Calendar,
@@ -79,7 +102,7 @@ const OmOss = () => {
             })}
           </div>
 
-          <Card className="p-8 text-center bg-primary/5">
+          <Card className="p-8 mb-12 text-center bg-primary/5">
             <h2 className="text-2xl font-bold mb-4">Kom i gang i dag</h2>
             <p className="text-muted-foreground mb-6">
               Registrer deg gratis og begynn å organisere turnusene dine
@@ -90,6 +113,95 @@ const OmOss = () => {
               </Button>
             </Link>
           </Card>
+
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold text-center mb-8">Kontakt oss</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="p-8">
+                <h3 className="text-xl font-bold mb-6">Send oss en melding</h3>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Navn</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">E-post</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="message">Melding</Label>
+                    <Textarea
+                      id="message"
+                      rows={5}
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Send melding
+                  </Button>
+                </form>
+              </Card>
+
+              <div className="space-y-6">
+                <Card className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-primary/10 flex-shrink-0">
+                      <Mail className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">E-post</h3>
+                      <p className="text-sm text-muted-foreground">
+                        kontakt@turnuskalender.no
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-accent/10 flex-shrink-0">
+                      <Clock className="h-6 w-6 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">Åpningstider</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Mandag - Fredag: 09:00 - 17:00<br />
+                        Lørdag - Søndag: Stengt
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-shift-blue/10 flex-shrink-0">
+                      <MapPin className="h-6 w-6 text-shift-blue" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">Adresse</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Oslo, Norge
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

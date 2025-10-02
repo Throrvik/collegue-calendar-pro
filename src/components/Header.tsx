@@ -11,7 +11,6 @@ const Header = () => {
     { path: "/", label: "Kalender", icon: Calendar },
     { path: "/kollegaer", label: "Kollegaer", icon: Users },
     { path: "/om-oss", label: "Om oss", icon: Info },
-    { path: "/kontakt", label: "Kontakt", icon: Mail },
   ];
 
   return (

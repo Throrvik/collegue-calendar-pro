@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import OmOss from "./pages/OmOss";
-import Kontakt from "./pages/Kontakt";
 import Kollegaer from "./pages/Kollegaer";
 import Profil from "./pages/Profil";
 import Innlogging from "./pages/Innlogging";
@@ -22,7 +21,6 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/om-oss" element={<OmOss />} />
-          <Route path="/kontakt" element={<Kontakt />} />
           <Route path="/kollegaer" element={<Kollegaer />} />
           <Route path="/profil" element={<Profil />} />
           <Route path="/innlogging" element={<Innlogging />} />
