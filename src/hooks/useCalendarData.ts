@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarDeviation,
   CustomShift,
+  ManualSchedule,
   PersistentCalendarState,
   loadPersistentCalendarState,
   savePersistentCalendarState,
@@ -49,6 +50,13 @@ function createCustomShiftId(date: string) {
   return `custom-${date}-${Date.now()}`;
 }
 
+function createManualScheduleId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `manual-${crypto.randomUUID()}`;
+  }
+  return `manual-${Date.now()}`;
+}
+
 type UseCalendarDataReturn = {
   colleagues: Colleague[];
   assignmentsByDate: Record<string, CalendarAssignment[]>;
@@ -60,6 +68,16 @@ type UseCalendarDataReturn = {
   ensureYearLoaded: (year: number) => void;
   specialDates: typeof SPECIAL_DATES;
   getAssignmentsForDate: (isoDate: string, options?: { includeUnselected?: boolean }) => CalendarAssignment[];
+  manualSchedules: ManualSchedule[];
+  addManualSchedule: (
+    schedule: Omit<ManualSchedule, "id" | "createdAt"> & { id?: string; createdAt?: string }
+  ) => void;
+  toggleManualSchedule: (id: string, enabled: boolean) => void;
+  removeManualSchedule: (id: string) => void;
+  clearManualSchedules: () => void;
+  deviations: CalendarDeviation[];
+  addDeviation: (entry: CalendarDeviation | CalendarDeviation[]) => void;
+  removeDeviation: (shiftId: string) => void;
 };
 
 export function useCalendarData(): UseCalendarDataReturn {
@@ -223,6 +241,83 @@ export function useCalendarData(): UseCalendarDataReturn {
     }));
   }, []);
 
+  const addManualSchedule = useCallback(
+    (schedule: Omit<ManualSchedule, "id" | "createdAt"> & { id?: string; createdAt?: string }) => {
+      setPersistentState((prev) => {
+        const id = schedule.id ?? createManualScheduleId();
+        const createdAt = schedule.createdAt ?? new Date().toISOString();
+        const nextSchedule: ManualSchedule = {
+          ...schedule,
+          id,
+          createdAt,
+          enabled: schedule.enabled ?? true,
+        };
+        const manualSchedules = prev.manualSchedules.filter((item) => item.id !== id).concat(nextSchedule);
+        return {
+          ...prev,
+          manualSchedules,
+        };
+      });
+    },
+    []
+  );
+
+  const toggleManualSchedule = useCallback((id: string, enabled: boolean) => {
+    setPersistentState((prev) => ({
+      ...prev,
+      manualSchedules: prev.manualSchedules.map((schedule) =>
+        schedule.id === id ? { ...schedule, enabled } : schedule
+      ),
+    }));
+  }, []);
+
+  const removeManualSchedule = useCallback((id: string) => {
+    setPersistentState((prev) => ({
+      ...prev,
+      manualSchedules: prev.manualSchedules.filter((schedule) => schedule.id !== id),
+    }));
+  }, []);
+
+  const clearManualSchedules = useCallback(() => {
+    setPersistentState((prev) => ({
+      ...prev,
+      manualSchedules: [],
+    }));
+  }, []);
+
+  const deviationsList = useMemo(
+    () => Object.values(persistentState.deviations),
+    [persistentState.deviations]
+  );
+
+  const addDeviation = useCallback((entry: CalendarDeviation | CalendarDeviation[]) => {
+    const items = Array.isArray(entry) ? entry : [entry];
+    setPersistentState((prev) => {
+      const deviations = { ...prev.deviations };
+      for (const item of items) {
+        deviations[item.shiftId] = item;
+      }
+      return {
+        ...prev,
+        deviations,
+      };
+    });
+  }, []);
+
+  const removeDeviation = useCallback((shiftId: string) => {
+    setPersistentState((prev) => {
+      if (!prev.deviations[shiftId]) {
+        return prev;
+      }
+      const deviations = { ...prev.deviations };
+      delete deviations[shiftId];
+      return {
+        ...prev,
+        deviations,
+      };
+    });
+  }, []);
+
   return {
     colleagues: DEFAULT_COLLEAGUES,
     assignmentsByDate,
@@ -234,5 +329,13 @@ export function useCalendarData(): UseCalendarDataReturn {
     ensureYearLoaded,
     specialDates: SPECIAL_DATES,
     getAssignmentsForDate,
+    manualSchedules: persistentState.manualSchedules,
+    addManualSchedule,
+    toggleManualSchedule,
+    removeManualSchedule,
+    clearManualSchedules,
+    deviations: deviationsList,
+    addDeviation,
+    removeDeviation,
   };
 }

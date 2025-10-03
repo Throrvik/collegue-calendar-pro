@@ -10,14 +10,19 @@ export type PersistentCalendarState = {
   closeColleagueIds: string[];
   deviations: Record<string, CalendarDeviation>;
   customShifts: CustomShift[];
+  manualSchedules: ManualSchedule[];
 };
 
 export type CalendarDeviation = {
   id: string;
   date: string; // ISO date (YYYY-MM-DD)
   shiftId: string;
+  colleagueId: string;
   note: string;
   severity: "info" | "warning" | "critical";
+  pattern?: string;
+  durationDays?: number;
+  keepRhythm?: boolean;
 };
 
 export type CustomShift = {
@@ -25,6 +30,17 @@ export type CustomShift = {
   date: string; // ISO date
   label: string;
   shiftType: string;
+};
+
+export type ManualSchedule = {
+  id: string;
+  name: string;
+  pattern: string;
+  startDate: string; // ISO date
+  colorClass: string;
+  enabled: boolean;
+  patternType: "preset" | "custom";
+  createdAt: string; // ISO timestamp
 };
 
 const DEFAULT_STATE: PersistentCalendarState = {
@@ -42,6 +58,7 @@ const DEFAULT_STATE: PersistentCalendarState = {
       id: "dev-thomas-2024-05-17",
       date: "2024-05-17",
       shiftId: "thomas-2024-05-17",
+      colleagueId: "thomas",
       note: "Byttet til morgenvakt på grunn av 17. mai-tog.",
       severity: "info",
     },
@@ -49,6 +66,7 @@ const DEFAULT_STATE: PersistentCalendarState = {
       id: "dev-self-2024-07-14",
       date: "2024-07-14",
       shiftId: "self-2024-07-14",
+      colleagueId: "self",
       note: "Permisjon for bursdagsfeiring.",
       severity: "warning",
     },
@@ -61,6 +79,7 @@ const DEFAULT_STATE: PersistentCalendarState = {
       shiftType: "custom",
     },
   ],
+  manualSchedules: [],
 };
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -129,6 +148,7 @@ export function loadPersistentCalendarState(): PersistentCalendarState {
         closeColleagueIds: parsed.closeColleagueIds ?? DEFAULT_STATE.closeColleagueIds,
         deviations: parsed.deviations ?? DEFAULT_STATE.deviations,
         customShifts: parsed.customShifts ?? DEFAULT_STATE.customShifts,
+        manualSchedules: parsed.manualSchedules ?? DEFAULT_STATE.manualSchedules,
       };
     } catch (error) {
       console.warn("Failed to parse calendar state from storage, resetting.", error);
@@ -155,6 +175,7 @@ export function savePersistentCalendarState(state: PersistentCalendarState) {
     closeColleagueIds: state.closeColleagueIds,
     deviations: state.deviations,
     customShifts: state.customShifts,
+    manualSchedules: state.manualSchedules,
   });
 
   if (storage) {
