@@ -1,6 +1,6 @@
 # Database Schema Overview
 
-This document describes the backend MySQL tables that power the colleague calendar application, as well as the supporting configuration and email infrastructure.
+This document describes the backend MySQL tables that power the colleague calendar application, as well as the supporting configuration and email infrastructure. You can create the full schema by running `database/schema.sql` and load demo data with `database/seed.sql`.
 
 ## Tables
 
