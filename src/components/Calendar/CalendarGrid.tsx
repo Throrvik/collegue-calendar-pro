@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getWeek } from "date-fns";
 
 const WEEKDAYS = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"];
 const MONTHS = [
@@ -42,12 +43,13 @@ const CalendarGrid = () => {
     const previousMonth = new Date(targetYear, targetMonth, 0);
     const daysInPreviousMonth = previousMonth.getDate();
 
-    const days = [];
+    const weeks: JSX.Element[][] = [];
+    let currentWeek: JSX.Element[] = [];
     
     // Vis dager fra forrige måned
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
       const day = daysInPreviousMonth - i;
-      days.push(
+      currentWeek.push(
         <Card
           key={`prev-${day}`}
           className={`${isCompact ? 'p-1 min-h-[60px]' : 'p-2 min-h-[80px]'} bg-muted/30 text-muted-foreground`}
@@ -70,7 +72,7 @@ const CalendarGrid = () => {
       
       const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
-      days.push(
+      currentWeek.push(
         <Card
           key={day}
           className={`${isCompact ? 'p-1 min-h-[60px]' : 'p-2 min-h-[80px]'} hover:shadow-md transition-shadow cursor-pointer ${
@@ -82,9 +84,34 @@ const CalendarGrid = () => {
           </div>
         </Card>
       );
+
+      // Når vi har fylt en uke (7 dager), legg den til weeks og start en ny uke
+      if (currentWeek.length === 7) {
+        weeks.push(currentWeek);
+        currentWeek = [];
+      }
     }
 
-    return days;
+    // Legg til siste uke hvis den ikke er komplett
+    if (currentWeek.length > 0) {
+      // Fyll opp med tomme celler hvis nødvendig
+      while (currentWeek.length < 7) {
+        const nextMonthDay = currentWeek.length - startingDayOfWeek - daysInMonth + 1;
+        currentWeek.push(
+          <Card
+            key={`next-${nextMonthDay}`}
+            className={`${isCompact ? 'p-1 min-h-[60px]' : 'p-2 min-h-[80px]'} bg-muted/30 text-muted-foreground`}
+          >
+            <div className={`${isCompact ? 'text-xs' : 'text-sm'}`}>
+              {nextMonthDay}
+            </div>
+          </Card>
+        );
+      }
+      weeks.push(currentWeek);
+    }
+
+    return weeks;
   };
 
   const renderYearView = () => {
@@ -94,17 +121,21 @@ const CalendarGrid = () => {
           <Card key={monthIndex} className="p-4">
             <h3 className="text-lg font-semibold mb-3 text-center">{monthName}</h3>
             <div className="grid grid-cols-7 gap-1 mb-1">
-              {WEEKDAYS.map((day) => (
+              {WEEKDAYS.map((day, idx) => (
                 <div
                   key={day}
-                  className="text-center text-xs font-semibold text-muted-foreground"
+                  className={`text-center text-xs font-semibold ${idx === 6 ? 'text-destructive' : 'text-muted-foreground'}`}
                 >
                   {day.charAt(0)}
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-1">
-              {renderMonthDays(year, monthIndex, true)}
+            <div className="space-y-1">
+              {renderMonthDays(year, monthIndex, true).map((week, weekIdx) => (
+                <div key={weekIdx} className="grid grid-cols-7 gap-1">
+                  {week}
+                </div>
+              ))}
             </div>
           </Card>
         ))}
@@ -153,18 +184,30 @@ const CalendarGrid = () => {
 
         <TabsContent value="month" className="mt-0">
           <div className="grid grid-cols-7 gap-2 mb-2">
-            {WEEKDAYS.map((day) => (
+            {WEEKDAYS.map((day, idx) => (
               <div
                 key={day}
-                className="text-center text-sm font-semibold text-muted-foreground p-2"
+                className={`text-center text-sm font-semibold p-2 ${idx === 6 ? 'text-destructive' : 'text-muted-foreground'}`}
               >
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-2">
-            {renderMonthDays(year, month)}
+          <div className="space-y-2">
+            {renderMonthDays(year, month).map((week, weekIdx) => {
+              const weekNumber = getWeek(new Date(year, month, 1 + weekIdx * 7), { weekStartsOn: 1 });
+              return (
+                <div key={weekIdx} className="flex gap-2 items-center">
+                  <div className="text-xs font-semibold text-muted-foreground w-12 text-right">
+                    Uke {weekNumber}
+                  </div>
+                  <div className="grid grid-cols-7 gap-2 flex-1">
+                    {week}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </TabsContent>
 

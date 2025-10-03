@@ -18,7 +18,10 @@ const Header = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center space-x-2">
           <Calendar className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold text-foreground">TurnusKalender</span>
+          <span className="text-xl font-bold">
+            <span className="text-foreground">Min</span>
+            <span className="text-primary">Turnus</span>
+          </span>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-1">
