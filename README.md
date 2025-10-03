@@ -60,6 +60,22 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Kalenderarkitektur og dataflyt
+
+- Lokal lagring versjoneres med `APP_VERSION` slik at gamle skift, farger og andre strukturer slettes automatisk når datastrukturen endres.
+- Når siden lastes, initialiseres ukedagsraden, hendelser registreres og lokale data, kollegaer, nære kollegaer, avvik og brukerskift lastes før kalenderen tegnes.
+- Fargevalg, valgte kollegaer, listen over nære kollegaer og avvik lagres i `localStorage`, med fallback til en cache dersom brukeren ikke er innlogget eller API-kall feiler.
+- Kun egendefinerte turnuser persisteres i `localStorage`; egne og kollegers turnuser holdes i minnet slik at de alltid samsvarer med serverstatus.
+
+## Navigasjon og visning
+
+- Kalenderheaderen tilbyr navigasjon for forrige/neste måned, en «I dag»-knapp og en bryter for årsvy, og månedsnavn oppdateres dynamisk når brukeren navigerer.
+- `updateView` bytter mellom månedsrutenett og kompakt årsvy, der årsvyen rendrer 12 minikalendere med egen CSS.
+- Rutenettet viser ukenumre i venstre kolonne og bygger ukedagsraden (inkludert «Uke»-kolonnen) programmert slik at både måneds- og årsvy følger ISO-logikk.
+- Dagens dato får en tydelig bakgrunn, røde dager og spesielle markeringer vises som etiketter nederst i cellen og skjules automatisk i årsvy for å redusere støy.
+- Aktive turnuser vises som fargede prikker i kalendercellene, og avvik markeres med kantlinje og en ekstra markør både på prikken og i popupen.
+- Klikk på en dag åpner et popupkort med ukedag, dato og deltakerliste (fornavn + mønster), og på mobil flyttes popupen til bunnen av skjermen for bedre lesbarhet.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/14193d2e-4cc7-4d83-8a4b-a8ce4688ac1e) and click on Share -> Publish.
