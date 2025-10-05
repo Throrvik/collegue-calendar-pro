@@ -1,4 +1,4 @@
-export const APP_VERSION = "2024.09.01";
+export const APP_VERSION = "2024.09.15";
 
 const STORAGE_NAMESPACE = "colleague-calendar";
 const VERSION_KEY = `${STORAGE_NAMESPACE}:version`;
@@ -32,6 +32,12 @@ export type CustomShift = {
   shiftType: string;
 };
 
+export type ManualSchedulePatternMeta = {
+  type: "offshore";
+  weeksOn: number;
+  weeksOff: number;
+};
+
 export type ManualSchedule = {
   id: string;
   name: string;
@@ -40,6 +46,7 @@ export type ManualSchedule = {
   colorClass: string;
   enabled: boolean;
   patternType: "preset" | "custom";
+  patternMeta?: ManualSchedulePatternMeta;
   createdAt: string; // ISO timestamp
 };
 

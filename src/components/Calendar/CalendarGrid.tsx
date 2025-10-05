@@ -90,15 +90,49 @@ const MONTH_LABELS = [
   "Desember",
 ];
 
-const PRESET_PATTERNS = [
-  { value: "day", label: "Dagvakt (07:00–15:00)", pattern: "Dagvakt 07:00–15:00" },
-  { value: "evening", label: "Kveldsvakt (15:00–23:00)", pattern: "Kveldsvakt 15:00–23:00" },
-  { value: "night", label: "Nattevakt (23:00–07:00)", pattern: "Nattevakt 23:00–07:00" },
-  {
-    value: "weekday",
-    label: "Mandag–fredag (08:00–16:00)",
-    pattern: "Mandag–fredag 08:00–16:00",
-  },
+type OffshorePresetPattern = {
+  value: string;
+  label: string;
+  description: string;
+  weeksOn: number;
+  weeksOff: number;
+};
+
+const formatWeekCount = (weeks: number) => {
+  if (weeks === 0) return "0 uker";
+  if (weeks === 1) return "1 uke";
+  return `${weeks} uker`;
+};
+
+const createPatternDescription = (weeksOn: number, weeksOff: number) =>
+  `${formatWeekCount(weeksOn)} på / ${formatWeekCount(weeksOff)} av`;
+
+const formatPatternDisplay = (weeksOn: number, weeksOff: number) =>
+  `${weeksOn}-${weeksOff} · ${createPatternDescription(weeksOn, weeksOff)}`;
+
+const PRESET_PATTERNS: OffshorePresetPattern[] = [
+  { value: "0-1", label: "0-1", description: createPatternDescription(0, 1), weeksOn: 0, weeksOff: 1 },
+  { value: "0-2", label: "0-2", description: createPatternDescription(0, 2), weeksOn: 0, weeksOff: 2 },
+  { value: "0-3", label: "0-3", description: createPatternDescription(0, 3), weeksOn: 0, weeksOff: 3 },
+  { value: "0-4", label: "0-4", description: createPatternDescription(0, 4), weeksOn: 0, weeksOff: 4 },
+  { value: "0-5", label: "0-5", description: createPatternDescription(0, 5), weeksOn: 0, weeksOff: 5 },
+  { value: "1-1", label: "1-1", description: createPatternDescription(1, 1), weeksOn: 1, weeksOff: 1 },
+  { value: "1-2", label: "1-2", description: createPatternDescription(1, 2), weeksOn: 1, weeksOff: 2 },
+  { value: "1-3", label: "1-3", description: createPatternDescription(1, 3), weeksOn: 1, weeksOff: 3 },
+  { value: "1-4", label: "1-4", description: createPatternDescription(1, 4), weeksOn: 1, weeksOff: 4 },
+  { value: "2-1", label: "2-1", description: createPatternDescription(2, 1), weeksOn: 2, weeksOff: 1 },
+  { value: "2-2", label: "2-2", description: createPatternDescription(2, 2), weeksOn: 2, weeksOff: 2 },
+  { value: "2-3", label: "2-3", description: createPatternDescription(2, 3), weeksOn: 2, weeksOff: 3 },
+  { value: "2-4", label: "2-4", description: createPatternDescription(2, 4), weeksOn: 2, weeksOff: 4 },
+  { value: "2-6", label: "2-6", description: createPatternDescription(2, 6), weeksOn: 2, weeksOff: 6 },
+  { value: "3-1", label: "3-1", description: createPatternDescription(3, 1), weeksOn: 3, weeksOff: 1 },
+  { value: "3-2", label: "3-2", description: createPatternDescription(3, 2), weeksOn: 3, weeksOff: 2 },
+  { value: "3-3", label: "3-3", description: createPatternDescription(3, 3), weeksOn: 3, weeksOff: 3 },
+  { value: "3-4", label: "3-4", description: createPatternDescription(3, 4), weeksOn: 3, weeksOff: 4 },
+  { value: "4-4", label: "4-4", description: createPatternDescription(4, 4), weeksOn: 4, weeksOff: 4 },
+  { value: "4-5", label: "4-5", description: createPatternDescription(4, 5), weeksOn: 4, weeksOff: 5 },
+  { value: "4-8", label: "4-8", description: createPatternDescription(4, 8), weeksOn: 4, weeksOff: 8 },
+  { value: "5-5", label: "5-5", description: createPatternDescription(5, 5), weeksOn: 5, weeksOff: 5 },
 ];
 
 const MANUAL_SCHEDULE_COLORS = [
@@ -113,7 +147,7 @@ const MANUAL_SCHEDULE_COLORS = [
 
 const MANUAL_SCHEDULE_LIMIT = 10;
 
-const CUSTOM_PATTERN_HELP = "Bruk formatet X-Y/D, f.eks. 3-2/D.";
+const CUSTOM_PATTERN_HELP = "Bruk formatet X-Y, f.eks. 2-4.";
 
 const SEVERITY_LABELS = {
   info: "Info",
@@ -151,28 +185,24 @@ type OverviewEntry = {
 
 const toISODate = (date: Date) => format(date, "yyyy-MM-dd");
 
+const parseWeekPattern = (pattern: string) => {
+  const match = pattern.trim().match(/^(\d+)\s*-\s*(\d+)$/);
+  if (!match) {
+    return null;
+  }
+
+  const weeksOn = Number.parseInt(match[1], 10);
+  const weeksOff = Number.parseInt(match[2], 10);
+
+  if (Number.isNaN(weeksOn) || Number.isNaN(weeksOff) || weeksOn < 0 || weeksOff < 0) {
+    return null;
+  }
+
+  return { weeksOn, weeksOff };
+};
+
 const isValidCustomPattern = (pattern: string) => {
-  const trimmed = pattern.trim();
-  if (!trimmed.includes("-") || !trimmed.includes("/")) {
-    return false;
-  }
-  const [cycle, rhythm] = trimmed.split("/");
-  if (!cycle || !rhythm) {
-    return false;
-  }
-  const segments = cycle.split("-");
-  if (segments.length < 2) {
-    return false;
-  }
-  const hasInvalidSegment = segments.some((segment) => {
-    if (!segment) return true;
-    const value = Number.parseInt(segment, 10);
-    return Number.isNaN(value) || value <= 0;
-  });
-  if (hasInvalidSegment) {
-    return false;
-  }
-  return /^[A-Za-zÆØÅæøå]+$/.test(rhythm.trim());
+  return parseWeekPattern(pattern) !== null;
 };
 
 const getNextManualScheduleColor = (schedules: ManualSchedule[]) => {
@@ -205,7 +235,7 @@ const manualScheduleSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["customPattern"],
-        message: "Oppgi et gyldig mønster (X-Y/D).",
+        message: "Oppgi et gyldig mønster (X-Y).",
       });
     }
   });
@@ -534,19 +564,37 @@ const CalendarGrid = () => {
 
   const handleManualScheduleSubmit = (values: ManualScheduleFormValues) => {
     const trimmedName = values.name.trim();
-    const pattern =
-      values.patternMode === "preset"
-        ? PRESET_PATTERNS.find((item) => item.value === values.presetPattern)?.pattern ?? ""
-        : values.customPattern?.trim().toUpperCase() ?? "";
+    let patternDisplay = "";
+    let patternMeta: ManualSchedule["patternMeta"] | undefined;
+    let sanitizedCustomPattern = values.customPattern?.trim() ?? "";
 
-    if (!pattern) {
-      toast({
-        title: "Ufullstendig mønster",
-        description:
-          "Velg et forhåndsdefinert mønster eller oppgi et egendefinert X-Y/D-mønster.",
-        variant: "destructive",
-      });
-      return;
+    if (values.patternMode === "preset") {
+      const preset = PRESET_PATTERNS.find((item) => item.value === values.presetPattern);
+      if (!preset) {
+        toast({
+          title: "Velg mønster",
+          description: "Velg et forhåndsdefinert mønster fra listen før du lagrer.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      patternDisplay = formatPatternDisplay(preset.weeksOn, preset.weeksOff);
+      patternMeta = { type: "offshore", weeksOn: preset.weeksOn, weeksOff: preset.weeksOff };
+    } else {
+      const parsed = parseWeekPattern(values.customPattern ?? "");
+      if (!parsed) {
+        toast({
+          title: "Ugyldig mønster",
+          description: "Bruk formatet X-Y, for eksempel 2-4.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      patternDisplay = formatPatternDisplay(parsed.weeksOn, parsed.weeksOff);
+      patternMeta = { type: "offshore", weeksOn: parsed.weeksOn, weeksOff: parsed.weeksOff };
+      sanitizedCustomPattern = `${parsed.weeksOn}-${parsed.weeksOff}`;
     }
 
     if (manualScheduleLimitReached) {
@@ -572,11 +620,12 @@ const CalendarGrid = () => {
 
     addManualSchedule({
       name: trimmedName,
-      pattern,
+      pattern: patternDisplay,
       startDate: values.startDate,
       colorClass: getNextManualScheduleColor(manualSchedules),
       enabled: true,
       patternType: values.patternMode,
+      patternMeta,
     });
 
     toast({
@@ -588,7 +637,7 @@ const CalendarGrid = () => {
       name: "",
       patternMode: values.patternMode,
       presetPattern: values.patternMode === "preset" ? values.presetPattern ?? "" : "",
-      customPattern: "",
+      customPattern: values.patternMode === "custom" ? sanitizedCustomPattern : "",
       startDate: "",
     });
   };
@@ -1023,7 +1072,7 @@ const CalendarGrid = () => {
                               <SelectItem key={pattern.value} value={pattern.value}>
                                 <div className="flex flex-col">
                                   <span>{pattern.label}</span>
-                                  <span className="text-xs text-muted-foreground">{pattern.pattern}</span>
+                                  <span className="text-xs text-muted-foreground">{pattern.description}</span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -1042,7 +1091,7 @@ const CalendarGrid = () => {
                     <FormItem>
                       <FormLabel>Egendefinert mønster</FormLabel>
                       <FormControl>
-                        <Input placeholder="For eksempel 3-2/D" {...field} />
+                        <Input placeholder="For eksempel 2-4" {...field} />
                       </FormControl>
                       <FormDescription className="text-xs">{CUSTOM_PATTERN_HELP}</FormDescription>
                       <FormMessage />
