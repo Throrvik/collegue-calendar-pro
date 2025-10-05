@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { addDays, formatISO, parseISO } from "date-fns";
 
 import {
   CalendarDeviation,
   CustomShift,
   ManualSchedule,
+  ManualSchedulePatternMeta,
   PersistentCalendarState,
   loadPersistentCalendarState,
   savePersistentCalendarState,
@@ -27,7 +29,7 @@ export type CalendarAssignment = {
   pattern: string;
   colleagueId: string;
   colleague: Colleague;
-  source: "server" | "custom";
+  source: "server" | "custom" | "manual";
   deviation?: CalendarDeviation;
   isOwn: boolean;
   isCloseColleague: boolean;
@@ -194,6 +196,76 @@ export function useCalendarData(): UseCalendarDataReturn {
         isOwn: true,
         isCloseColleague: true,
       });
+    }
+
+    const manualColleague = DEFAULT_COLLEAGUES.find((c) => c.id === "self") ?? DEFAULT_COLLEAGUES[0];
+    const generationHorizonDays = 365 * 5;
+
+    const isValidManualMeta = (meta?: ManualSchedulePatternMeta): meta is ManualSchedulePatternMeta => {
+      return !!meta && meta.type === "offshore" && meta.weeksOn >= 0 && meta.weeksOff >= 0;
+    };
+
+    for (const schedule of persistentState.manualSchedules) {
+      if (!schedule.enabled) {
+        continue;
+      }
+
+      if (!schedule.startDate) {
+        continue;
+      }
+
+      if (!isValidManualMeta(schedule.patternMeta)) {
+        continue;
+      }
+
+      const start = parseISO(schedule.startDate);
+      if (Number.isNaN(start.getTime())) {
+        continue;
+      }
+
+      const { weeksOn, weeksOff } = schedule.patternMeta;
+      const onDurationDays = weeksOn * 7 + 1;
+      const offDurationDays = weeksOff * 7;
+      const cycleLength = Math.max(onDurationDays + offDurationDays, onDurationDays);
+
+      if (onDurationDays <= 0 || cycleLength <= 0) {
+        continue;
+      }
+
+      const generationEnd = addDays(start, generationHorizonDays);
+
+      for (
+        let cycleStart = start, cycleIndex = 0;
+        cycleStart <= generationEnd && cycleIndex < 1000;
+        cycleStart = addDays(cycleStart, cycleLength), cycleIndex++
+      ) {
+        for (let dayOffset = 0; dayOffset < onDurationDays; dayOffset++) {
+          const current = addDays(cycleStart, dayOffset);
+          if (current > generationEnd) {
+            break;
+          }
+
+          const isoDate = formatISO(current, { representation: "date" });
+
+          addAssignment({
+            id: `${schedule.id}-${isoDate}`,
+            date: isoDate,
+            shiftType: "manual",
+            label: schedule.name,
+            colorClass: schedule.colorClass,
+            pattern: schedule.pattern,
+            colleagueId: "self",
+            colleague: manualColleague,
+            source: "manual",
+            isOwn: true,
+            isCloseColleague: true,
+          });
+        }
+
+        if (cycleLength === 0) {
+          break;
+        }
+      }
     }
 
     return map;
