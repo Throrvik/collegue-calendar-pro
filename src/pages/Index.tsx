@@ -7,63 +7,63 @@ import { Users, Calendar as CalendarIcon, Bell } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <Header />
       <CookieBanner />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">
-            Min Turnuskalender
+      <main className="container mx-auto px-4 py-12">
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-fade-in">
+            Din Smarte Turnuskalender
           </h1>
-          <p className="text-muted-foreground">
-            Oversikt over turnuser, kollegaer og planlegging
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Få full oversikt over turnuser, samarbeid med kollegaer og smart planlegging
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mb-8">
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <CalendarIcon className="h-5 w-5 text-primary" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <Card className="p-8 hover:shadow-large transition-all duration-300 hover:-translate-y-1 border-2 hover:border-primary/20 bg-gradient-to-br from-card to-primary/5">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-glow">
+                <CalendarIcon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold">Mine turnuser</h3>
+              <h3 className="text-xl font-bold">Mine Turnuser</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Ingen turnuser registrert ennå
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Hold oversikt over alle dine arbeidsskift og planlegg framover
             </p>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button size="lg" className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-md">
               Legg til turnus
             </Button>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-accent/10">
-                <Users className="h-5 w-5 text-accent" />
+          <Card className="p-8 hover:shadow-large transition-all duration-300 hover:-translate-y-1 border-2 hover:border-accent/20 bg-gradient-to-br from-card to-accent/5">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/10">
+                <Users className="h-6 w-6 text-accent" />
               </div>
-              <h3 className="font-semibold">Kollegaer</h3>
+              <h3 className="text-xl font-bold">Kollegaer</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Del kalenderen din med kollegaer
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Se kollegaenes turnuser og planlegg felles aktiviteter
             </p>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button variant="outline" size="lg" className="w-full hover:bg-accent/10 transition-all border-2">
               Finn kollegaer
             </Button>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-shift-blue/10">
-                <Bell className="h-5 w-5 text-shift-blue" />
+          <Card className="p-8 hover:shadow-large transition-all duration-300 hover:-translate-y-1 border-2 hover:border-shift-blue/20 bg-gradient-to-br from-card to-shift-blue/5">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-shift-blue/20 to-shift-blue/10">
+                <Bell className="h-6 w-6 text-shift-blue" />
               </div>
-              <h3 className="font-semibold">Varsler</h3>
+              <h3 className="text-xl font-bold">Varsler</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Ingen nye varsler
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Få varslinger om viktige endringer og avtaler
             </p>
-            <Button variant="outline" size="sm" className="w-full">
-              Se innstillinger
+            <Button variant="outline" size="lg" className="w-full hover:bg-shift-blue/10 transition-all border-2">
+              Konfigurer
             </Button>
           </Card>
         </div>
