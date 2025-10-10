@@ -2,7 +2,7 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/kalende1/public_html
-    - export NPM_BIN="$(command -v npm || echo /opt/cpanel/ea-nodejs20/bin/npm)"
+    - export NPM_BIN=/opt/cpanel/ea-nodejs22/bin/npm
     - $NPM_BIN ci
     - $NPM_BIN run build
     - /bin/rsync -a --delete dist/ $DEPLOYPATH/
