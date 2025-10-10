@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MinTurnus - Enkel turnusplanlegging</title>
     <meta name="description" content="Organiser og del turnusene dine med kollegaer. Enkel turnusplanlegging for alle som jobber i turnus." />
@@ -20,41 +20,6 @@
 
   <body>
     <div id="root"></div>
-    <script type="module">
-      const loadApp = async () => {
-        const metaEnv = import.meta.env ?? {};
-        const loaders = metaEnv.PROD
-          ? [() => import("./src/main.tsx")]
-          : [() => import("/src/main.tsx")];
-
-        loaders.push(
-          () =>
-            new Promise((resolve, reject) => {
-              const script = document.createElement("script");
-              script.type = "module";
-              script.src = "/assets/index.js";
-              script.onload = () => resolve(void 0);
-              script.onerror = () => reject(new Error("Kunne ikke laste fallback-modulen"));
-              document.head.appendChild(script);
-            }),
-        );
-
-        let lastError = null;
-
-        for (const load of loaders) {
-          try {
-            await load();
-            return;
-          } catch (error) {
-            lastError = error;
-            console.warn("Kunne ikke laste modul", error);
-          }
-        }
-
-        console.error("Kunne ikke laste applikasjonen", lastError);
-      };
-
-      loadApp();
-    </script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
