@@ -73,6 +73,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const WEEKDAY_LABELS = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"];
 const MONTH_LABELS = [
@@ -271,6 +272,7 @@ const buildMonthMatrix = (targetYear: number, targetMonth: number) => {
 };
 
 const CalendarGrid = () => {
+  const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"month" | "year">("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -458,7 +460,18 @@ const CalendarGrid = () => {
     const isoDate = toISODate(date);
     const contextDate = new Date(contextYear, contextMonth, 1);
     const isInContextMonth = isSameMonth(date, contextDate);
-    const visibleAssignments = getAssignmentsForDate(isoDate);
+    
+    let visibleAssignments = getAssignmentsForDate(isoDate);
+    
+    // Filter assignments based on login status
+    if (!user) {
+      // Not logged in: show only manual schedules
+      visibleAssignments = visibleAssignments.filter(a => a.source === "manual");
+    } else {
+      // Logged in: show own + close colleagues + manual schedules
+      // This is already filtered by getAssignmentsForDate based on selectedColleagueIds
+    }
+    
     const allAssignments = assignmentsByDate[isoDate] ?? [];
     const hiddenCount = Math.max(allAssignments.length - visibleAssignments.length, 0);
     const specialDay = specialDates[isoDate];
@@ -995,7 +1008,7 @@ const CalendarGrid = () => {
       )}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <Card className="p-6">
+        <Card id="manual-schedule-section" className="p-6">
           <div className="mb-4 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <PlusCircle className="h-5 w-5 text-primary" />
