@@ -1,4 +1,3 @@
-import { addDays, formatISO, isLeapYear, startOfYear } from "date-fns";
 
 export type Colleague = {
   id: string;
@@ -47,61 +46,6 @@ export function getPatternLabel(shiftType: string): string {
   return SHIFT_PATTERNS[shiftType] ?? shiftType;
 }
 
-export function generateServerShifts(year: number): ServerShift[] {
-  const start = startOfYear(new Date(year, 0, 1));
-  const daysInYear = isLeapYear(start) ? 366 : 365;
-  const shifts: ServerShift[] = [];
-
-  for (let dayIndex = 0; dayIndex < daysInYear; dayIndex++) {
-    const date = addDays(start, dayIndex);
-    const iso = formatISO(date, { representation: "date" });
-
-    // Egen turnus (Kari) - jobber dagvakt hver tredje dag
-    if (dayIndex % 3 === 0) {
-      shifts.push({
-        id: `self-${iso}`,
-        colleagueId: "self",
-        date: iso,
-        shiftType: "day",
-        pattern: getPatternLabel("day"),
-      });
-    }
-
-    // Thomas jobber to dager på (dag + kveld) og to dager av
-    const thomasCycle = dayIndex % 4;
-    if (thomasCycle === 0 || thomasCycle === 1) {
-      shifts.push({
-        id: `thomas-${iso}`,
-        colleagueId: "thomas",
-        date: iso,
-        shiftType: thomasCycle === 0 ? "day" : "evening",
-        pattern: getPatternLabel(thomasCycle === 0 ? "day" : "evening"),
-      });
-    }
-
-    // Fatima dekker nattevakter hver femte dag
-    if (dayIndex % 5 === 2) {
-      shifts.push({
-        id: `fatima-${iso}`,
-        colleagueId: "fatima",
-        date: iso,
-        shiftType: "night",
-        pattern: getPatternLabel("night"),
-      });
-    }
-
-    // Lars er støtte i helger (lørdag og søndag)
-    const weekday = date.getDay();
-    if (weekday === 6 || weekday === 0) {
-      shifts.push({
-        id: `lars-${iso}`,
-        colleagueId: "lars",
-        date: iso,
-        shiftType: "support",
-        pattern: getPatternLabel("support"),
-      });
-    }
-  }
-
-  return shifts;
+export function generateServerShifts(_: number): ServerShift[] {
+  return [];
 }
