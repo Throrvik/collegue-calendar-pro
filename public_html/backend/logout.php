@@ -5,20 +5,19 @@ header('Content-Type: application/json; charset=utf-8');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Metode ikke tillatt.']);
+    echo json_encode(['ok' => false, 'error' => 'Metode ikke tillatt']);
     exit;
 }
 
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => 'minturnus.no',
-    'secure' => true,
-    'httponly' => true,
-    'samesite' => 'Lax',
-]);
-
 if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => 'minturnus.no',
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 

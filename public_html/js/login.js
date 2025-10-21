@@ -2,30 +2,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("form");
   const errors = document.getElementById("error-messages");
 
-  if (!form) return;
-
-  form.addEventListener("submit", async (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (errors) errors.textContent = "";
 
-    const email = document.getElementById("email")?.value.trim() ?? "";
-    const password = document.getElementById("password")?.value ?? "";
+    const email = document.getElementById("email")?.value?.trim() || "";
+    const password = document.getElementById("password")?.value || "";
 
     try {
-      const res = await fetch("/api/login.php", {
+      const res = await fetch("/backend/login.php", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ email, password }),
       });
-
       const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Feil brukernavn eller passord");
+      if (!res.ok || !data.ok) throw new Error(data.error || "Innlogging feilet");
 
       sessionStorage.setItem("user", JSON.stringify(data.user));
       window.location.href = "/";
     } catch (err) {
-      if (errors) errors.textContent = String(err?.message || err || "Feil brukernavn eller passord");
+      if (errors) errors.textContent = String(err.message || err);
     }
   });
 });
