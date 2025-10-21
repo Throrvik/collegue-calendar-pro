@@ -2,10 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/kalende1/public_html
-    - export PATH="/opt/cpanel/ea-nodejs22/bin:$PATH"
-    - export npm_config_scripts_prepend_node_path=true
-    - export NODE_OPTIONS="--max-old-space-size=1024"
-    - /opt/cpanel/ea-nodejs22/bin/npm ci
-    - /opt/cpanel/ea-nodejs22/bin/npm run build
-    - /bin/rsync -a --delete dist/ $DEPLOYPATH/
-    - if [ -f web/.htaccess ]; then /bin/rsync -a web/.htaccess $DEPLOYPATH/.htaccess; fi
+    - /bin/cp -R * $DEPLOYPATH
