@@ -1,0 +1,10 @@
+<Files "database.php">
+  Require all denied
+</Files>
+
+RewriteEngine On
+RewriteBase /api/
+
+# tillat kun POST for login/logout
+RewriteCond %{REQUEST_METHOD} !POST
+RewriteRule ^(login|logout)\.php$ - [R=405,L]
