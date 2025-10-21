@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// Database configuration. Environment variables take precedence over these defaults.
 const DB_HOST = '127.0.0.1';
 const DB_PORT = '3306';
 const DB_NAME = 'minturnus';

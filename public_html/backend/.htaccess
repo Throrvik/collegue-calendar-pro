@@ -3,8 +3,6 @@
 </Files>
 
 RewriteEngine On
-RewriteBase /api/
-
-# tillat kun POST for login/logout
+RewriteBase /backend/
 RewriteCond %{REQUEST_METHOD} !POST
 RewriteRule ^(login|logout)\.php$ - [R=405,L]
